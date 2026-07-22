@@ -24,7 +24,7 @@ A powerful Redis management extension for ServerKit. Monitor, browse, and manage
 
 ```bash
 # Clone the repository
-git clone https://github.com/paongdev/serverkit-redis.git
+git clone https://github.com/farhanturu/serverkit-redis.git
 
 # Build frontend
 cd serverkit-redis/frontend
@@ -116,5 +116,6 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## Support
 
-- GitHub Issues: https://github.com/paongdev/serverkit-redis/issues
+- GitHub Issues: https://github.com/farhanturu/serverkit-redis/issues
+- Email: paongtech@gmail.com
 - ServerKit Discord: https://discord.gg/serverkit
