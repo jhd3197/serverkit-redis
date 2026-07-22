@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Get Version
+        id: version
+        run: |
+          VERSION=$(grep '"version"' plugin.json | cut -d'"' -f4)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create ZIP
+        run: |
+          chmod +x scripts/build-zip.sh
+          ./scripts/build-zip.sh
+
+      - name: Calculate SHA256
+        id: sha256
+        run: |
+          SHA256=$(sha256sum dist/serverkit-redis-${{ steps.version.outputs.version }}.zip | cut -d' ' -f1)
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          files: dist/serverkit-redis-${{ steps.version.outputs.version }}.zip
+          generate_release_notes: true
+
+      - name: Update Registry
+        if: env.REGISTRY_TOKEN != ''
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        run: |
+          git clone https://x-access-token:${REGISTRY_TOKEN}@github.com/jhd3197/serverkit-extensions.git /tmp/registry
+          node scripts/update-registry.mjs /tmp/registry
+          cd /tmp/registry
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.json
+          git commit -m "Update serverkit-redis to v${{ steps.version.outputs.version }}"
+          git push
