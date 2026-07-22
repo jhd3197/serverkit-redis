@@ -1,6 +1,15 @@
+<div align="center">
+
 # ServerKit Redis Manager
 
+![Redis Logo](assets/serverkit-redis/logo.svg)
+
 A powerful Redis management extension for ServerKit. Monitor, browse, and manage your Redis server directly from the panel.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![ServerKit](https://img.shields.io/badge/ServerKit-Extension-blue.svg)](https://github.com/jhd3197/ServerKit)
+
+</div>
 
 ## Features
 
