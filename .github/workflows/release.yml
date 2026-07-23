@@ -23,7 +23,7 @@ jobs:
       - name: Build Frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
 
       - name: Get Version

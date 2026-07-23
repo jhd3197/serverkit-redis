@@ -3,6 +3,11 @@
 
 set -e
 
+# Resolve repo root from script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+
 # Get version from plugin.json
 VERSION=$(grep '"version"' plugin.json | cut -d'"' -f4)
 SLUG=$(grep '"name"' plugin.json | cut -d'"' -f4)
@@ -31,7 +36,7 @@ fi
 
 # Create zip
 cd "$BUILD_DIR"
-zip -r "/home/paong/serverkit-redis/dist/$SLUG-$VERSION.zip" .
+zip -r "$REPO_ROOT/dist/$SLUG-$VERSION.zip" .
 
 # Cleanup
 rm -rf "$BUILD_DIR"

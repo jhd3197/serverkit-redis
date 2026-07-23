@@ -8,8 +8,9 @@
     "permissions": ["shell"],
     "min_panel_version": "1.7.0",
     "max_panel_version": null,
-    "homepage": "https://github.com/paongdev/serverkit-redis",
-    "repository": "https://github.com/paongdev/serverkit-redis",
+    "homepage": "https://github.com/farhanturu/serverkit-redis",
+    "repository": "https://github.com/farhanturu/serverkit-redis",
+    "frontend_entry": "dist/index.mjs",
     "keywords": ["redis", "cache", "database", "monitoring"],
     "icon": "database"
 }
