@@ -2,7 +2,7 @@
 Redis Manager API Routes
 """
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from app.middleware.rbac import admin_required
 import subprocess
 import shlex
 
@@ -26,7 +26,7 @@ def is_redis_running():
 
 
 @redis_bp.route('/status', methods=['GET'])
-@jwt_required()
+@admin_required
 def get_redis_status():
     """Get Redis server status."""
     if not is_redis_running():
@@ -55,7 +55,7 @@ def get_redis_status():
 
 
 @redis_bp.route('/keys', methods=['GET'])
-@jwt_required()
+@admin_required
 def list_keys():
     """List Redis keys."""
     pattern = request.args.get('pattern', '*')
@@ -81,7 +81,7 @@ def list_keys():
 
 
 @redis_bp.route('/keys/<path:key>', methods=['GET'])
-@jwt_required()
+@admin_required
 def get_key(key):
     """Get key value."""
     type_out, _ = run_redis_command(f"type {key}")
@@ -103,7 +103,7 @@ def get_key(key):
 
 
 @redis_bp.route('/keys/<path:key>', methods=['DELETE'])
-@jwt_required()
+@admin_required
 def delete_key(key):
     """Delete a key."""
     out, code = run_redis_command(f"del {key}")
@@ -113,7 +113,7 @@ def delete_key(key):
 
 
 @redis_bp.route('/command', methods=['POST'])
-@jwt_required()
+@admin_required
 def run_command():
     """Run Redis command."""
     data = request.get_json()
@@ -121,8 +121,14 @@ def run_command():
         return jsonify({'error': 'command is required'}), 400
     
     command = data['command']
-    dangerous = ['flushall', 'flushdb', 'shutdown', 'debug']
-    if any(d in command.lower() for d in dangerous):
+    blocked = {
+        'flushall', 'flushdb', 'shutdown', 'debug', 'config', 'eval',
+        'evalsha', 'script', 'module', 'replicaof', 'slaveof', 'acl',
+        'migrate', 'failover', 'cluster', 'monitor', 'subscribe',
+        'psubscribe', 'ssubscribe', 'swapdb', 'reset',
+    }
+    first_token = command.strip().split(maxsplit=1)[0].lower() if command.strip() else ''
+    if first_token in blocked:
         return jsonify({'error': 'Command not allowed'}), 403
     
     out, code = run_redis_command(command)
@@ -130,7 +136,7 @@ def run_command():
 
 
 @redis_bp.route('/config', methods=['GET'])
-@jwt_required()
+@admin_required
 def get_config():
     """Get Redis configuration."""
     out, _ = run_redis_command("config get *")
@@ -147,10 +153,12 @@ def get_config():
 
 
 @redis_bp.route('/slowlog', methods=['GET'])
-@jwt_required()
+@admin_required
 def get_slowlog():
     """Get slow log entries."""
     count = request.args.get('count', '10')
+    if not count.isdigit():
+        return jsonify({'error': 'count must be a positive integer'}), 400
     out, _ = run_redis_command(f"slowlog get {count}")
     
     entries = []

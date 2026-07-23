@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
     
     steps:
       - name: Checkout
@@ -23,7 +25,7 @@ jobs:
       - name: Build Frontend
         working-directory: frontend
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
 
       - name: Get Version
@@ -53,11 +55,9 @@ jobs:
 
       - name: Update Registry
         if: env.REGISTRY_TOKEN != ''
-        env:
-          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
         run: |
           git clone https://x-access-token:${REGISTRY_TOKEN}@github.com/jhd3197/serverkit-extensions.git /tmp/registry
-          node scripts/update-registry.mjs /tmp/registry
+          node scripts/update-registry.mjs /tmp/registry "${{ steps.sha256.outputs.sha256 }}"
           cd /tmp/registry
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

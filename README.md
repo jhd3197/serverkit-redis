@@ -11,6 +11,12 @@ A powerful Redis management extension for ServerKit. Monitor, browse, and manage
 
 </div>
 
+> **Credits.** Original extension by **[Paong](https://github.com/farhanturu/serverkit-redis)** (MIT).
+> This fork adds security hardening (admin-only RBAC, a strict command
+> blocklist, input validation) and a working runtime frontend bundle on top of
+> the original v1.0.0. All credit for the idea and the original implementation
+> goes to the upstream author; fixes are offered back upstream.
+
 ## Features
 
 - **Real-time Monitoring** - Server status, memory usage, connected clients, cache hit rate
