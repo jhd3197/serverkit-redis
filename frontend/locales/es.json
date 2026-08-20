@@ -1,0 +1,33 @@
+{
+    "redis": {
+        "index": {
+            "actions": "Acciones",
+            "backToKeys": "Volver a las claves",
+            "cacheHitRate": "Tasa de aciertos de caché",
+            "clients": "Clientes",
+            "commandsProcessed": "Comandos procesados",
+            "delete": "Eliminar",
+            "deleteKey": "¿Eliminar la clave «{{key}}»?",
+            "enterRedisCommandEGInfo": "Escribe un comando de Redis (p. ej. INFO, KEYS *, GET clave)",
+            "key": "Clave",
+            "key2": "Clave:",
+            "loadingRedis": "Cargando Redis...",
+            "maxMemory": "Memoria máxima",
+            "memory": "Memoria",
+            "noKeysFound": "No se encontraron claves",
+            "redis": "Redis",
+            "redis2": "Redis",
+            "redisCli": "CLI de Redis",
+            "refresh": "Actualizar",
+            "run": "Ejecutar",
+            "search": "Buscar",
+            "searchPatternEGUser": "Patrón de búsqueda (p. ej. user:*)",
+            "serverInformation": "Información del servidor",
+            "totalKeys": "Claves totales",
+            "type": "Tipo",
+            "uptime": "Tiempo activo",
+            "version": "Versión",
+            "view": "Ver"
+        }
+    }
+}

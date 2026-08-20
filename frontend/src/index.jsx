@@ -9,8 +9,11 @@ import { useTranslation } from 'serverkit-sdk';
 // This repo has no separate runtime-entry; src/index.jsx IS the bundle entry.
 import i18next from 'i18next';
 import en from '../locales/en.json';
+import es from '../locales/es.json';
 
-i18next.addResourceBundle('en', 'translation', en, true, false);
+for (const [language, bundle] of Object.entries({ en, es })) {
+    i18next.addResourceBundle(language, 'translation', bundle, true, false);
+}
 
 const RedisManager = ({ api }) => {
     const { t } = useTranslation();
