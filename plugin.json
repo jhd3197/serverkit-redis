@@ -3,6 +3,7 @@
     "display_name": "Redis Manager",
     "description": "Redis server management with key browser, CLI terminal, and real-time monitoring",
     "version": "1.0.1",
+    "sdk_version": "^1.3.0",
     "author": "Paong",
     "license": "MIT",
     "permissions": ["shell"],

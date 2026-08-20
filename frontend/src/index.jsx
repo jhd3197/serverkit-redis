@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Database, RefreshCw, Trash2, Search, Activity, HardDrive, Users } from 'lucide-react';
+import { useTranslation } from 'serverkit-sdk';
+
+// Translations. Registered against the PANEL's i18next singleton (shared via
+// its vendor import map), additively and under this extension's own `redis`
+// namespace — never init() or changeLanguage(), which the panel owns.
+//
+// This repo has no separate runtime-entry; src/index.jsx IS the bundle entry.
+import i18next from 'i18next';
+import en from '../locales/en.json';
+
+i18next.addResourceBundle('en', 'translation', en, true, false);
 
 const RedisManager = ({ api }) => {
+    const { t } = useTranslation();
     const [status, setStatus] = useState(null);
     const [keys, setKeys] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -50,7 +62,7 @@ const RedisManager = ({ api }) => {
     }
 
     async function deleteKey(key) {
-        if (!confirm(`Delete key "${key}"?`)) return;
+        if (!confirm(t('redis.index.deleteKey', 'Delete key "{{key}}"?', { key: key }))) return;
         try {
             await api.request(`/redis/keys/${encodeURIComponent(key)}`, { method: 'DELETE' });
             loadKeys();
@@ -74,7 +86,7 @@ const RedisManager = ({ api }) => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px' }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ width: '40px', height: '40px', border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-                    <p style={{ color: 'var(--text-muted)' }}>Loading Redis...</p>
+                    <p style={{ color: 'var(--text-muted)' }}>{t('redis.index.loadingRedis', 'Loading Redis...')}</p>
                 </div>
             </div>
         );
@@ -84,13 +96,13 @@ const RedisManager = ({ api }) => {
         <div style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Redis</h1>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>{t('redis.index.redis', 'Redis')}</h1>
                     <p style={{ color: 'var(--text-muted)', margin: '4px 0 0', fontSize: '0.9rem' }}>
                         {status?.running ? 'Server is running' : 'Server is not running'}
                     </p>
                 </div>
                 <button onClick={loadStatus} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <RefreshCw size={16} /> Refresh
+                    <RefreshCw size={16} /> {t('redis.index.refresh', 'Refresh')}
                 </button>
             </div>
 
@@ -103,10 +115,10 @@ const RedisManager = ({ api }) => {
             {status?.running && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                     {[
-                        { icon: Activity, label: 'Version', value: status.version },
-                        { icon: HardDrive, label: 'Memory', value: status.used_memory },
-                        { icon: Database, label: 'Total Keys', value: status.total_keys },
-                        { icon: Users, label: 'Clients', value: status.connected_clients },
+                        { icon: Activity, labelKey: 'redis.index.version', label: 'Version', value: status.version },
+                        { icon: HardDrive, labelKey: 'redis.index.memory', label: 'Memory', value: status.used_memory },
+                        { icon: Database, labelKey: 'redis.index.totalKeys', label: 'Total Keys', value: status.total_keys },
+                        { icon: Users, labelKey: 'redis.index.clients', label: 'Clients', value: status.connected_clients },
                     ].map(({ icon: Icon, label, value }) => (
                         <div key={label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -129,13 +141,13 @@ const RedisManager = ({ api }) => {
 
             {activeTab === 'status' && status?.running && (
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px' }}>Server Information</h3>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px' }}>{t('redis.index.serverInformation', 'Server Information')}</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         {[
-                            { label: 'Uptime', value: `${Math.floor(status.uptime / 3600)}h ${Math.floor((status.uptime % 3600) / 60)}m` },
-                            { label: 'Commands Processed', value: status.commands_processed },
-                            { label: 'Cache Hit Rate', value: status.hits && status.misses ? ((parseInt(status.hits) / (parseInt(status.hits) + parseInt(status.misses)) * 100).toFixed(1) + '%') : 'N/A' },
-                            { label: 'Max Memory', value: status.max_memory || 'No limit' },
+                            { labelKey: 'redis.index.uptime', label: 'Uptime', value: `${Math.floor(status.uptime / 3600)}h ${Math.floor((status.uptime % 3600) / 60)}m` },
+                            { labelKey: 'redis.index.commandsProcessed', label: 'Commands Processed', value: status.commands_processed },
+                            { labelKey: 'redis.index.cacheHitRate', label: 'Cache Hit Rate', value: status.hits && status.misses ? ((parseInt(status.hits) / (parseInt(status.hits) + parseInt(status.misses)) * 100).toFixed(1) + '%') : 'N/A' },
+                            { labelKey: 'redis.index.maxMemory', label: 'Max Memory', value: status.max_memory || 'No limit' },
                         ].map(({ label, value }) => (
                             <div key={label} style={{ padding: '12px', background: 'var(--bg)', borderRadius: '8px' }}>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{label}</div>
@@ -151,19 +163,19 @@ const RedisManager = ({ api }) => {
                     <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                         <div style={{ position: 'relative', flex: 1 }}>
                             <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                            <input type="text" value={searchPattern} onChange={(e) => setSearchPattern(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && loadKeys()} placeholder="Search pattern (e.g., user:*)" style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-card)', color: 'var(--text)', fontSize: '0.9rem' }} />
+                            <input type="text" value={searchPattern} onChange={(e) => setSearchPattern(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && loadKeys()} placeholder={t('redis.index.searchPatternEGUser', 'Search pattern (e.g., user:*)')} style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg-card)', color: 'var(--text)', fontSize: '0.9rem' }} />
                         </div>
-                        <button onClick={loadKeys} style={{ padding: '10px 20px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Search</button>
+                        <button onClick={loadKeys} style={{ padding: '10px 20px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>{t('redis.index.search', 'Search')}</button>
                     </div>
 
                     <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Key</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Type</th>
+                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t('redis.index.key', 'Key')}</th>
+                                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t('redis.index.type', 'Type')}</th>
                                     <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>TTL</th>
-                                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Actions</th>
+                                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t('redis.index.actions', 'Actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -180,10 +192,10 @@ const RedisManager = ({ api }) => {
                                         </td>
                                         <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                                             <button onClick={() => viewKey(item.key)} style={{ padding: '5px 12px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', marginRight: '8px', fontSize: '0.8rem', fontWeight: 500 }}>
-                                                View
+                                                {t('redis.index.view', 'View')}
                                             </button>
                                             <button onClick={() => deleteKey(item.key)} style={{ padding: '5px 12px', background: 'transparent', border: '1px solid rgba(239,68,68,0.4)', borderRadius: '6px', cursor: 'pointer', color: '#ef4444', fontSize: '0.8rem', fontWeight: 500 }}>
-                                                Delete
+                                                {t('redis.index.delete', 'Delete')}
                                             </button>
                                         </td>
                                     </tr>
@@ -192,7 +204,7 @@ const RedisManager = ({ api }) => {
                         </table>
                         {keys.length === 0 && (
                             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                                No keys found
+                                {t('redis.index.noKeysFound', 'No keys found')}
                             </div>
                         )}
                     </div>
@@ -201,10 +213,10 @@ const RedisManager = ({ api }) => {
 
             {activeTab === 'terminal' && (
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px' }}>Redis CLI</h3>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '16px' }}>{t('redis.index.redisCli', 'Redis CLI')}</h3>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                        <input type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && runCommand()} placeholder="Enter Redis command (e.g., INFO, KEYS *, GET key)" style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', fontFamily: 'monospace' }} />
-                        <button onClick={runCommand} style={{ padding: '10px 20px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Run</button>
+                        <input type="text" value={command} onChange={(e) => setCommand(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && runCommand()} placeholder={t('redis.index.enterRedisCommandEGInfo', 'Enter Redis command (e.g., INFO, KEYS *, GET key)')} style={{ flex: 1, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--bg)', color: 'var(--text)', fontSize: '0.9rem', fontFamily: 'monospace' }} />
+                        <button onClick={runCommand} style={{ padding: '10px 20px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>{t('redis.index.run', 'Run')}</button>
                     </div>
                     <pre style={{ padding: '16px', background: 'var(--bg)', borderRadius: '8px', fontSize: '0.85rem', maxHeight: '400px', overflow: 'auto', whiteSpace: 'pre-wrap', fontFamily: 'monospace', color: commandOutput ? 'var(--text)' : 'var(--text-muted)' }}>
                         {commandOutput || 'Run a command to see output...'}
@@ -215,9 +227,9 @@ const RedisManager = ({ api }) => {
             {activeTab === 'key-detail' && selectedKey && (
                 <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Key: {selectedKey.key}</h3>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{t('redis.index.key2', 'Key:')} {selectedKey.key}</h3>
                         <button onClick={() => setActiveTab('keys')} style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '6px', background: 'transparent', color: 'var(--text)', cursor: 'pointer', fontSize: '0.85rem' }}>
-                            Back to Keys
+                            {t('redis.index.backToKeys', 'Back to Keys')}
                         </button>
                     </div>
                     <div style={{ padding: '12px', background: 'var(--bg)', borderRadius: '8px', marginBottom: '16px' }}>
@@ -241,7 +253,7 @@ export const extension = {
     version: '1.0.0',
     component: RedisManager,
     nav: {
-        label: 'Redis',
+        labelKey: 'redis.index.redis2', label: 'Redis',
         icon: 'database',
         path: '/redis',
     },

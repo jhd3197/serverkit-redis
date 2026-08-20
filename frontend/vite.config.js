@@ -11,7 +11,7 @@ export default defineConfig({
             fileName: () => 'index.mjs',
         },
         rollupOptions: {
-            external: ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom', 'serverkit-sdk'],
+            external: ['react', 'react-dom', 'react/jsx-runtime', 'react-router-dom', 'i18next', 'react-i18next', 'serverkit-sdk'],
         },
     },
 });
